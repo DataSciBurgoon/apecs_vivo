@@ -54,15 +54,22 @@ public class Parser {
             ChemicalDataModel chemicalDataModel;
             while ((line = reader.readLine()) != null) {
 //                System.out.println(line);
+//            	System.out.println(lineNumber);
                 if(lineNumber > 1){
                 	String[] entries = line.split("\t");
+                	//If we've seen this chemical before...
+//                	if(entries[0].contentEquals("Estriol")){
+//                		System.out.println(line);
+//                	}
                 	//If we've seen this chemical before...
                 	if(chemicalName.equalsIgnoreCase(entries[0])){
                 		//If we've seen this assayName before...
                 		if(assayName.equalsIgnoreCase(entries[3])){
                 			logc.add(new Double(entries[7]));
                 			response.add(new Double(entries[8]));
-//                			System.out.println("we've seen this chemical and assay before");
+//                			if(entries[0].contentEquals("Estriol")){
+//                    			System.out.println("name: " + entries[0] + "\tassayName: " + entries[3] + "\tlogc: " + entries[7] + "\tresponse: " + entries[8]);
+//                			}
                 		}
                 		//Same chemical, new assay
                 		//convert the ArrayList<Double> to primitive double[]
@@ -70,16 +77,25 @@ public class Parser {
                 		//Assign that to the HashMap with assayName as the key
                 		//Create new objects for assayName, logc, response
                 		//Add new values to logc and response ArrayLists<Double>
-                		else{
+                		else if(!assayName.equalsIgnoreCase(entries[3])){
+//                			System.out.println("I'm here!!!!");
                 			double[] dLogc = this.convertDoubles(logc);
                 			double[] dResponse = this.convertDoubles(response);
                 			AssayData assayData = new AssayData(dLogc, dResponse);
+//                			for(int i = 0; i < dResponse.length; i++){
+//                				if(chemicalName.contentEquals("Estriol")){
+//                    				System.out.println("just added: " + chemicalName + "\t" + assayName + "\t" + dLogc[i] + "\t" + dResponse[i]); 
+//                				}
+//                			}
                 			hmAssayData.put(assayName, assayData);
                 			assayName = new String(entries[3]);
                 			logc = new ArrayList<Double>();
                 			response = new ArrayList<Double>();
                 			logc.add(new Double(entries[7]));
                 			response.add(new Double(entries[8]));
+//                			if(entries[0].contentEquals("Estriol")){
+//                    			System.out.println("name: " + chemicalName + "\tassayName: " + assayName + "\tlogc: " + logc.get(0) + "\tresponse: " + response.get(0));
+//                			}
 //                			System.out.println("we've seen this chemical before, but new assay");
                 		}
                 	}
@@ -89,10 +105,16 @@ public class Parser {
                 		assayName = entries[3];
                 		logc.add(new Double(entries[7]));
                 		response.add(new Double(entries[8]));
+//                		if(entries[0].contentEquals("Estriol")){
+//                			System.out.println("we have a problem... chemical name: " + entries[0] + "\tassayName: " + entries[3] + "\tlogc: " + entries[7] + "\tresponse: " + entries[8]);
+//            			}
 //                		System.out.println("this is the first chemical we've seen");
                 	}
                 	//New chemical, but not the first chemical in the file, means a new assay, too
                 	else{
+                		if(entries[0].contentEquals("Estriol")){
+                			System.out.println("new chemical name: " + entries[0] + "\tassayName: " + entries[3] + "\tlogc: " + entries[7] + "\tresponse: " + entries[8]);
+            			}
                 		double[] dLogc = this.convertDoubles(logc);
             			double[] dResponse = this.convertDoubles(response);
             			AssayData assayData = new AssayData(dLogc, dResponse);

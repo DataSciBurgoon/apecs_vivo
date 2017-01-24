@@ -111,16 +111,24 @@ public class EventHandlerController implements Initializable{
             		if(setAssayNames.contains(assayName)){
 //            			System.out.println("chemical name: " + chemicalDataModel.getChemicalName());
 //            			System.out.println(assayName);
+            			
             			Loess loess = new Loess(assayData);
             			if(!loess.getFlag()){
             				AssayData loessAssayData = loess.getLoessResults();
-                			double[] chemicalResponse = loessAssayData.getResponse();
+            				double[] chemLogC = loessAssayData.getSortedLogc();
+                			double[] chemicalResponse = loessAssayData.getSortedResponse();
                 			double[] estradiolResponse = hmEstradiolAssayData.get(assayName);
-                			for(int i = 0; i < chemicalResponse.length; i++){
-//                				System.out.println("chemicalResponse: " + chemicalResponse[i] + "\testradiolResponse: " + estradiolResponse[i]);
-                			}
+                			if(chemicalDataModel.getChemicalName().contentEquals("Estriol")){
+                				System.out.println("assayName: " + assayName + "\tnum avglogc: " + assayData.getAvgLogC().length + "\tnum logc: " + assayData.getLogC().length + "\tnum avg_responses: " + assayData.getAvgResponse().length + "\tnum responses: " + assayData.getResponse().length);
+            				}
+//                			for(int i = 0; i < assayData.getAvgLogC().length; i++){
+//                				if(chemicalDataModel.getChemicalName().contentEquals("Estriol")){
+//                    				System.out.println("assayName: " + assayName + "\tlogc: " + assayData.getAvgLogC()[i] + "\tresponse: " + assayData.getAvgResponse()[i]);
+//                				}
+//                			}
                 			PearsonsCorrelation pc = new PearsonsCorrelation();
                 			double correlation = pc.correlation(estradiolResponse, chemicalResponse);
+//                			System.out.println(chemicalDataModel.getChemicalName() + "assay: " + assayName + " corr: " + correlation);
                 			hmAssayCorrelation.put(new String(assayName), new Double(correlation));
             			}
             			else{
@@ -138,7 +146,7 @@ public class EventHandlerController implements Initializable{
             EstrogenicAEMVivo estrogenAEM = new EstrogenicAEMVivo();
             double[] estrogenCorr = {1.000,1.0000,1.0000,1.0000,1.00000,1.00000,1.00000,1.00000, 1.0000, 1.0000};
             double[] estrogen_score = estrogenAEM.score0(estrogenCorr, preds);
-            double[] estrogenAE = {estrogenAEM.ACTIVATION[2][0], estrogenAEM.ACTIVATION[2][1]};
+            double[] estrogenAE = {estrogenAEM.ACTIVATION[4][0], estrogenAEM.ACTIVATION[4][1]};
             
 //            System.out.println(estrogenAEM.ACTIVATION[2][0]);
 //            System.out.println(estrogenAEM.ACTIVATION[2][1]);
@@ -171,11 +179,11 @@ public class EventHandlerController implements Initializable{
                 	EstrogenicAEMVivo aem = new EstrogenicAEMVivo();
             		double[] output_scores = aem.score0(response, preds);
 //            		double[] output_scores = aem.score0(estrogenCorr, preds);
-            		Double ae1 = new Double(aem.ACTIVATION[2][0]);
-            		Double ae2 = new Double(aem.ACTIVATION[2][1]);
+            		Double ae1 = new Double(aem.ACTIVATION[4][0]);
+            		Double ae2 = new Double(aem.ACTIVATION[4][1]);
             		double distance = Math.sqrt(Math.pow(estrogenAE[0]-ae1, 2.0) + Math.pow(estrogenAE[1]-ae2, 2.0));
             		JsonObjectBuilder lowjob = Json.createObjectBuilder();
-            		if(distance <= 1.35){
+            		if(distance <= 1.50){
             			ChemicalEstrogenResult chemicalEstrogenResult = new ChemicalEstrogenResult(
             					chemicalCorrelation.getChemicalname(), true, distance, ae1, ae2, q);
             			alChemicalEstrogenResult.add(chemicalEstrogenResult);
